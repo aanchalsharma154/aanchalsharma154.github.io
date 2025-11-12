@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wildcard | Data Engineer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Share+Tech+Mono&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fira Code', monospace;
+            background: #0a0e27;
+            color: #00ff41;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px),
+                linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 50%,
+                rgba(0, 255, 65, 0.02) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1;
+            animation: scanline 8s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100%); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .terminal-border {
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 20px;
+            background: rgba(10, 14, 39, 0.9);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+            margin-bottom: 30px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+        }
+
+        .ascii-art {
+            font-size: 10px;
+            line-height: 1.2;
+            color: #00ff41;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .glitch {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #00ff41;
+            position: relative;
+            display: inline-block;
+            animation: glitch 2s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { text-shadow: 2px 2px #ff00de, -2px -2px #00ffff; }
+            25% { text-shadow: -2px 2px #ff00de, 2px -2px #00ffff; }
+            50% { text-shadow: 2px -2px #ff00de, -2px 2px #00ffff; }
+            75% { text-shadow: -2px -2px #ff00de, 2px 2px #00ffff; }
+        }
+
+        .typing {
+            overflow: hidden;
+            border-right: 3px solid #00ff41;
+            white-space: nowrap;
+            margin: 20px auto;
+            animation: typing 3s steps(40) infinite, blink 0.7s step-end infinite;
+            display: inline-block;
+        }
+
+        @keyframes typing {
+            0%, 90%, 100% { width: 0; }
+            30%, 60% { width: 100%; }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        .tagline {
+            font-size: 1.2em;
+            color: #00ff41;
+            margin: 20px 0;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .prompt {
+            color: #ff00de;
+            font-weight: bold;
+        }
+
+        .quote {
+            font-size: 1em;
+            color: #00ffff;
+            margin-top: 20px;
+            padding: 15px;
+            border-left: 3px solid #ff00de;
+            background: rgba(0, 255, 65, 0.05);
+            border-radius: 5px;
+            font-style: italic;
+        }
+
+        .stats-section {
+            background: rgba(0, 255, 65, 0.05);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        }
+
+        .stats-header {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #ff00de;
+            text-shadow: 0 0 10px rgba(255, 0, 222, 0.5);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 255, 65, 0.08);
+            border: 1px solid #00ff41;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .stat-item:hover {
+            background: rgba(0, 255, 65, 0.15);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+        }
+
+        .stat-label {
+            color: #00ff41;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .skill-card {
+            background: rgba(0, 255, 65, 0.05);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-card::before {
+            content: '> LOADING...';
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 0.7em;
+            color: #ff00de;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .skill-card:hover::before {
+            opacity: 1;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.4);
+            background: rgba(0, 255, 65, 0.1);
+        }
+
+        .skill-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            display: block;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.5));
+        }
+
+        .skill-title {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .skill-desc {
+            color: #00ff41;
+            line-height: 1.6;
+            font-size: 0.9em;
+        }
+
+        .level-indicator {
+            margin-top: 15px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .level-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(0, 255, 65, 0.2);
+            border: 1px solid #00ff41;
+            transition: 0.3s;
+        }
+
+        .level-dot.active {
+            background: #00ff41;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.8);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .contact-section {
+            text-align: center;
+            margin: 60px 0;
+            padding: 40px;
+            background: rgba(255, 0, 222, 0.05);
+            border: 2px solid #ff00de;
+            border-radius: 10px;
+        }
+
+        .contact-header {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #ff00de;
+        }
+
+        .contact-prompt {
+            color: #00ffff;
+            margin-bottom: 30px;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.1em;
+            background: rgba(0, 255, 65, 0.08);
+            padding: 15px 30px;
+            border: 1px solid #00ff41;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .contact-item:hover {
+            background: rgba(0, 255, 65, 0.15);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+            transform: translateX(5px);
+        }
+
+        .contact-icon {
+            font-size: 1.5em;
+        }
+
+        .contact-link {
+            color: #00ff41;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .contact-link:hover {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #00ff41;
+            font-size: 0.9em;
+            border-top: 1px solid #00ff41;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .glitch {
+                font-size: 2em;
+            }
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+            .ascii-art {
+                font-size: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanline"></div>
+    <div class="container">
+        <header>
+            <div class="ascii-art">
+   _____ _          __        ___ _     _                  _ 
+  |_   _| |__   ___  \ \      / (_) | __| | ___ __ _ _ __ __| |
+    | | | '_ \ / _ \  \ \ /\ / /| | |/ _` |/ __/ _` | '__/ _` |
+    | | | | | |  __/   \ V  V / | | | (_| | (_| (_| | | | (_| |
+    |_| |_| |_|\___|    \_/\_/  |_|_|\__,_|\___\__,_|_|  \__,_|
+            </div>
+            <h1 class="glitch">THE WILDCARD</h1>
+            <p class="tagline"><span class="prompt">root@wildcard:~$</span> <span class="typing">cat /skills/data_engineer.txt</span></p>
+            <p class="tagline" style="margin-top: 10px;">Jack of All Trades | Data Pipeline Architect | Professional Debugger of Life</p>
+            <div class="quote">
+                <span class="prompt">//</span> "A jack of all trades is a master of none,<br>
+                but oftentimes better than a master of one"<br>
+                <span class="prompt">//</span> And also better at finding the bug at 3 AM
+            </div>
+        </header>
+
+        <div class="stats-section">
+            <h2 class="stats-header">╔═══ SYSTEM.STATS() ═══╗</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">500</div>
+                    <div class="stat-label">pages/72hrs<br>(with coffee breaks)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">∞</div>
+                    <div class="stat-label">data_points_analyzed<br>(and counting)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">52</div>
+                    <div class="stat-label">cards.deck_size()<br>(all accounted for)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">9001</div>
+                    <div class="stat-label">binge_watch_level<br>(it's over 9000!)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="terminal-border">
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <span class="skill-icon">📊</span>
+                    <h3 class="skill-title">[DATA_WHISPERER]</h3>
+                    <p class="skill-desc">// Passionate about extracting stories from data. Every dataset is like a 500-page thriller—except I finish it in 3 days while solving production bugs.</p>
+                    <div class="level-indicator">
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                    </div>
+                </div>
+
+                <div class="skill-card">
+                    <span class="skill-icon">📚</span>
+                    <h3 class="skill-title">[BOOK_INHALER.py]</h3>
+                    <p class="skill-desc">// Speed: 500 pages in 3 days. That's like processing 166.67 pages/day. More efficient than most ETL pipelines. Books are just unstructured data waiting to be absorbed.</p>
+                    <div class="level-indicator">
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                    </div>
+                </div>
+
+                <div class="skill-card">
+                    <span class="skill-icon">🃏</span>
+                    <h3 class="skill-title">[CARD_SHARK.exe]</h3>
+                    <p class="skill-desc">// Great at cards because probability is just another algorithm. Shuffle = randomization. Winning = optimized decision trees. Plus, bluffing is basically A/B testing your opponents.</p>
+                    <div class="level-indicator">
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot"></div>
+                    </div>
+                </div>
+
+                <div class="skill-card">
+                    <span class="skill-icon">📺</span>
+                    <h3 class="skill-title">[BINGE_MASTER_3000]</h3>
+                    <p class="skill-desc">// World-class level unlocked! Multi-season marathons completed in record time. If streaming services had achievement badges, I'd have them all. Netflix asks ME for recommendations.</p>
+                    <div class="level-indicator">
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                    </div>
+                </div>
+
+                <div class="skill-card">
+                    <span class="skill-icon">🏓</span>
+                    <h3 class="skill-title">[pickleball_skills++]</h3>
+                    <p class="skill-desc">// Status: IMPROVING. Like debugging code—every game reveals new edge cases. Current trajectory suggests champion status in 3-5 sprints. Unit tests pending.</p>
+                    <div class="level-indicator">
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot"></div>
+                        <div class="level-dot"></div>
+                    </div>
+                </div>
+
+                <div class="skill-card">
+                    <span class="skill-icon">🕺</span>
+                    <h3 class="skill-title">[DANCE_MODE: ENABLED]</h3>
+                    <p class="skill-desc">// Drunk dancing = removing all filters and running in production. Zero test coverage, 100% confidence. Critics say "amazing," logs say "entertaining," dance floor says "legendary."</p>
+                    <div class="level-indicator">
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                    </div>
+                </div>
+
+                <div class="skill-card">
+                    <span class="skill-icon">🕷️</span>
+                    <h3 class="skill-title">[SCRAPY_NINJA.sh]</h3>
+                    <p class="skill-desc">// Web scraping wizard. If it's on the internet, I can extract it. HTML, JSON, or that weird nested structure someone thought was a good idea—I'll parse it all. Web data doesn't hide from me.</p>
+                    <div class="level-indicator">
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot"></div>
+                    </div>
+                </div>
+
+                <div class="skill-card">
+                    <span class="skill-icon">🛠️</span>
+                    <h3 class="skill-title">[JUGAAD_PRIMA_DONNA]</h3>
+                    <p class="skill-desc">// Queen of creative hacks and elegant workarounds. Documentation says impossible? Jugaad says "hold my chai." Why use 5 tools when duct tape, Python, and determination will do? Prima donna of practical solutions.</p>
+                    <div class="level-indicator">
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                    </div>
+                </div>
+
+                <div class="skill-card">
+                    <span class="skill-icon">🎯</span>
+                    <h3 class="skill-title">[VERSATILITY.core]</h3>
+                    <p class="skill-desc">// The wildcard advantage: adaptable, curious, and dangerously competent. Jack of all trades means I debug your code, analyze your data, win at cards, AND suggest what to binge next.</p>
+                    <div class="level-indicator">
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                        <div class="level-dot active"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-section">
+            <h2 class="contact-header">╔═══ ESTABLISH_CONNECTION() ═══╗</h2>
+            <p class="contact-prompt">// Let's talk data pipelines, books, card strategies, or which series deserves your next weekend.</p>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <span class="contact-icon">📧</span>
+                    <span class="prompt">email:</span>
+                    <a href="mailto:95712aanchalsharma@gmail.com" class="contact-link">95712aanchalsharma@gmail.com</a>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📱</span>
+                    <span class="prompt">phone:</span>
+                    <a href="tel:+919571225391" class="contact-link">+91 9571225391</a>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><span class="prompt">root@wildcard:~$</span> echo "© 2024 The Wildcard | Proof that versatility > specialization"</p>
+            <p style="margin-top: 10px; color: #00ffff;">// Bug reports welcome. Feature requests negotiable. Jugaad solutions guaranteed.</p>
+        </footer>
+    </div>
+</body>
+</html>
