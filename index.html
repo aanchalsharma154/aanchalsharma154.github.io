@@ -1,553 +1,1272 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Wildcard | Data Engineer</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Share+Tech+Mono&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>aanchal.sharma // portfolio.exe</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #0d1117;
+      --sidebar:   #161b22;
+      --panel:     #1c2128;
+      --border:    #30363d;
+      --accent1:   #ff6b9d;
+      --accent2:   #c792ea;
+      --accent3:   #7ee8fa;
+      --accent4:   #ffcb6b;
+      --accent5:   #80cbc4;
+      --green:     #a8ff78;
+      --orange:    #ff9d55;
+      --text:      #cdd9e5;
+      --muted:     #8b949e;
+      --line-num:  #484f58;
+      --highlight: #1f2937;
+      --tab-active:#1c2128;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Fira Code', monospace;
-            background: #0a0e27;
-            color: #00ff41;
-            overflow-x: hidden;
-            position: relative;
-        }
+    html { scroll-behavior: smooth; }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px),
-                linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 0;
-        }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
 
-        .scanline {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                to bottom,
-                transparent 50%,
-                rgba(0, 255, 65, 0.02) 50%
-            );
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 1;
-            animation: scanline 8s linear infinite;
-        }
+    /* ── SCANLINES overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,.08) 2px,
+        rgba(0,0,0,.08) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
 
-        @keyframes scanline {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(100%); }
-        }
+    /* ── TITLE BAR ── */
+    .titlebar {
+      background: #0d1117;
+      border-bottom: 1px solid var(--border);
+      height: 38px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .dots { display: flex; gap: 6px; }
+    .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: filter .2s;
+    }
+    .dot:hover { filter: brightness(1.4); }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .titlebar-name {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .5px;
+    }
+    .titlebar-name span { color: var(--accent1); }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-            position: relative;
-            z-index: 2;
-        }
+    /* ── MENU BAR ── */
+    .menubar {
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      height: 32px;
+      gap: 20px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .menubar span {
+      cursor: pointer;
+      transition: color .2s;
+      padding: 4px 0;
+    }
+    .menubar span:hover { color: var(--text); }
 
-        .terminal-border {
-            border: 2px solid #00ff41;
-            border-radius: 10px;
-            padding: 20px;
-            background: rgba(10, 14, 39, 0.9);
-            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
-            margin-bottom: 30px;
-        }
+    /* ── LAYOUT ── */
+    .ide-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      grid-template-rows: auto 1fr;
+      min-height: calc(100vh - 70px);
+    }
 
-        header {
-            text-align: center;
-            padding: 60px 20px 40px;
-        }
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      padding: 12px 0;
+      position: sticky;
+      top: 70px;
+      height: calc(100vh - 70px);
+      overflow-y: auto;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-        .ascii-art {
-            font-size: 10px;
-            line-height: 1.2;
-            color: #00ff41;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
-            font-family: 'Share Tech Mono', monospace;
-        }
+    .sidebar-section {
+      margin-bottom: 4px;
+    }
+    .sidebar-header {
+      padding: 4px 16px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .sidebar-header .arrow { transition: transform .2s; }
+    .sidebar-item {
+      padding: 3px 16px 3px 28px;
+      font-size: 12.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background .15s, color .15s;
+      border-left: 2px solid transparent;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .sidebar-item:hover {
+      background: rgba(255,255,255,.04);
+      color: var(--accent3);
+    }
+    .sidebar-item.active {
+      background: rgba(126,232,250,.07);
+      border-left-color: var(--accent3);
+      color: var(--accent3);
+    }
+    .file-icon { font-size: 13px; }
 
-        .glitch {
-            font-size: 3.5em;
-            font-weight: bold;
-            color: #00ff41;
-            position: relative;
-            display: inline-block;
-            animation: glitch 2s infinite;
-        }
+    /* ── TABS ── */
+    .tabs-bar {
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      grid-column: 2;
+    }
+    .tabs-bar::-webkit-scrollbar { display: none; }
+    .tab {
+      padding: 8px 20px;
+      font-size: 12px;
+      white-space: nowrap;
+      cursor: pointer;
+      border-right: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      transition: background .15s, color .15s;
+      position: relative;
+    }
+    .tab.active {
+      background: var(--tab-active);
+      color: var(--text);
+      border-bottom: 2px solid var(--accent1);
+    }
+    .tab:hover:not(.active) { background: rgba(255,255,255,.03); }
+    .tab-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent4);
+    }
 
-        @keyframes glitch {
-            0%, 100% { text-shadow: 2px 2px #ff00de, -2px -2px #00ffff; }
-            25% { text-shadow: -2px 2px #ff00de, 2px -2px #00ffff; }
-            50% { text-shadow: 2px -2px #ff00de, -2px 2px #00ffff; }
-            75% { text-shadow: -2px -2px #ff00de, 2px 2px #00ffff; }
-        }
+    /* ── MAIN CONTENT ── */
+    .main-content {
+      overflow-y: auto;
+      padding: 0;
+    }
 
-        .typing {
-            overflow: hidden;
-            border-right: 3px solid #00ff41;
-            white-space: nowrap;
-            margin: 20px auto;
-            animation: typing 3s steps(40) infinite, blink 0.7s step-end infinite;
-            display: inline-block;
-        }
+    /* ── CODE SECTION ── */
+    .code-section {
+      display: flex;
+      min-height: 100px;
+    }
+    .line-numbers {
+      padding: 20px 0;
+      min-width: 52px;
+      text-align: right;
+      padding-right: 14px;
+      background: var(--bg);
+      border-right: 1px solid var(--border);
+      font-size: 12px;
+      line-height: 1.8;
+      color: var(--line-num);
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .code-body {
+      padding: 20px 28px;
+      flex: 1;
+      font-size: 13.5px;
+      line-height: 1.8;
+    }
 
-        @keyframes typing {
-            0%, 90%, 100% { width: 0; }
-            30%, 60% { width: 100%; }
-        }
+    /* ── SYNTAX COLORS ── */
+    .kw    { color: var(--accent2); font-style: italic; }
+    .fn    { color: var(--accent3); }
+    .str   { color: var(--green); }
+    .num   { color: var(--orange); }
+    .cmt   { color: var(--muted); font-style: italic; }
+    .cls   { color: var(--accent4); }
+    .prop  { color: var(--accent1); }
+    .punc  { color: #89ddff; }
+    .bool  { color: var(--orange); }
+    .var   { color: var(--accent5); }
 
-        @keyframes blink {
-            50% { border-color: transparent; }
-        }
+    /* ── HERO ── */
+    .hero-section {
+      padding: 40px 0 0;
+      background: var(--bg);
+    }
+    .glitch-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+    .hero-name {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 800;
+      color: var(--accent1);
+      letter-spacing: -1px;
+      position: relative;
+      display: inline-block;
+      animation: glitch-anim 5s infinite;
+    }
+    .hero-name::before, .hero-name::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0;
+    }
+    .hero-name::before {
+      color: var(--accent3);
+      animation: glitch-1 5s infinite;
+      clip-path: polygon(0 0, 100% 0, 100% 40%, 0 40%);
+    }
+    .hero-name::after {
+      color: var(--accent2);
+      animation: glitch-2 5s infinite;
+      clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
+    }
+    @keyframes glitch-anim {
+      0%,90%,100% { transform: translate(0); }
+      92% { transform: translate(-2px, 1px); }
+      94% { transform: translate(2px, -1px); }
+      96% { transform: translate(-1px, 2px); }
+    }
+    @keyframes glitch-1 {
+      0%,90%,100% { transform: translate(0); opacity: 0; }
+      92% { transform: translate(-3px, 0); opacity: .8; }
+      94% { transform: translate(3px, 0); opacity: .8; }
+      96% { transform: translate(0); opacity: 0; }
+    }
+    @keyframes glitch-2 {
+      0%,90%,100% { transform: translate(0); opacity: 0; }
+      93% { transform: translate(3px, 0); opacity: .8; }
+      95% { transform: translate(-3px, 0); opacity: .8; }
+      97% { transform: translate(0); opacity: 0; }
+    }
 
-        .tagline {
-            font-size: 1.2em;
-            color: #00ff41;
-            margin: 20px 0;
-            font-family: 'Share Tech Mono', monospace;
-        }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(199,146,234,.15);
+      border: 1px solid rgba(199,146,234,.4);
+      color: var(--accent2);
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-left: 10px;
+      vertical-align: middle;
+      animation: pulse-border 2s infinite;
+    }
+    @keyframes pulse-border {
+      0%,100% { border-color: rgba(199,146,234,.4); }
+      50% { border-color: rgba(199,146,234,.9); box-shadow: 0 0 8px rgba(199,146,234,.3); }
+    }
 
-        .prompt {
-            color: #ff00de;
-            font-weight: bold;
-        }
+    .typing-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background: var(--accent3);
+      vertical-align: text-bottom;
+      animation: blink .8s step-end infinite;
+      margin-left: 2px;
+    }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
 
-        .quote {
-            font-size: 1em;
-            color: #00ffff;
-            margin-top: 20px;
-            padding: 15px;
-            border-left: 3px solid #ff00de;
-            background: rgba(0, 255, 65, 0.05);
-            border-radius: 5px;
-            font-style: italic;
-        }
+    /* ── SKILLS GRID ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .skill-chip {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all .2s;
+      cursor: default;
+    }
+    .skill-chip:hover {
+      border-color: var(--accent3);
+      background: rgba(126,232,250,.07);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(126,232,250,.1);
+    }
+    .skill-chip .chip-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
 
-        .stats-section {
-            background: rgba(0, 255, 65, 0.05);
-            border: 2px solid #00ff41;
-            border-radius: 10px;
-            padding: 40px;
-            margin: 40px 0;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
-        }
+    /* ── PROJECT CARDS ── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+    .project-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      transition: all .25s;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent3));
+      opacity: 0;
+      transition: opacity .25s;
+    }
+    .project-card:hover {
+      border-color: rgba(255,107,157,.4);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(255,107,157,.1);
+    }
+    .project-card:hover::before { opacity: 1; }
 
-        .stats-header {
-            text-align: center;
-            font-size: 2em;
-            margin-bottom: 30px;
-            color: #ff00de;
-            text-shadow: 0 0 10px rgba(255, 0, 222, 0.5);
-        }
+    .project-card:nth-child(2):hover { border-color: rgba(199,146,234,.4); box-shadow: 0 8px 24px rgba(199,146,234,.1); }
+    .project-card:nth-child(3):hover { border-color: rgba(126,232,250,.4); box-shadow: 0 8px 24px rgba(126,232,250,.1); }
+    .project-card:nth-child(4):hover { border-color: rgba(255,203,107,.4); box-shadow: 0 8px 24px rgba(255,203,107,.1); }
+    .project-card:nth-child(5):hover { border-color: rgba(128,203,196,.4); box-shadow: 0 8px 24px rgba(128,203,196,.1); }
+    .project-card:nth-child(6):hover { border-color: rgba(168,255,120,.4); box-shadow: 0 8px 24px rgba(168,255,120,.1); }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
-        }
+    .project-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent4);
+      margin-bottom: 8px;
+      letter-spacing: .3px;
+    }
+    .project-desc {
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .project-metric {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(168,255,120,.1);
+      border: 1px solid rgba(168,255,120,.3);
+      color: var(--green);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .project-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .ptag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
 
-        .stat-item {
-            text-align: center;
-            padding: 20px;
-            background: rgba(0, 255, 65, 0.08);
-            border: 1px solid #00ff41;
-            border-radius: 8px;
-            transition: 0.3s;
-        }
+    /* ── STAT BARS ── */
+    .stat-bar-row {
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      min-width: 100px;
+    }
+    .stat-track {
+      flex: 1;
+      height: 6px;
+      background: var(--panel);
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .stat-fill {
+      height: 100%;
+      border-radius: 3px;
+      animation: grow-bar 1.5s cubic-bezier(.16,1,.3,1) forwards;
+      transform-origin: left;
+    }
+    @keyframes grow-bar {
+      from { width: 0 !important; }
+    }
+    .stat-pct { font-size: 11px; color: var(--muted); min-width: 32px; text-align: right; }
 
-        .stat-item:hover {
-            background: rgba(0, 255, 65, 0.15);
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
-        }
+    /* ── TERMINAL BLOCK ── */
+    .terminal {
+      background: #090d12;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 16px 0;
+    }
+    .terminal-bar {
+      background: var(--sidebar);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .terminal-bar .dots { gap: 5px; }
+    .terminal-bar .dot { width: 10px; height: 10px; }
+    .terminal-title { font-size: 11px; color: var(--muted); margin-left: 6px; }
+    .terminal-body {
+      padding: 16px 18px;
+      font-size: 12.5px;
+      line-height: 2;
+    }
+    .prompt { color: var(--green); }
+    .prompt-path { color: var(--accent3); }
+    .prompt-branch { color: var(--accent2); }
+    .cmd { color: var(--text); }
+    .output { color: var(--muted); padding-left: 16px; display: block; }
+    .output.success { color: var(--green); }
+    .output.warn { color: var(--accent4); }
 
-        .stat-number {
-            font-size: 3em;
-            font-weight: bold;
-            color: #00ffff;
-            text-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
-        }
+    /* ── SECTION DIVIDERS ── */
+    .section-sep {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
 
-        .stat-label {
-            color: #00ff41;
-            margin-top: 10px;
-            font-size: 0.9em;
-        }
+    /* ── BADGE ROW ── */
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .badge {
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      border: 1px solid;
+      animation: badge-float 3s ease-in-out infinite;
+    }
+    .badge:nth-child(2) { animation-delay: .3s; }
+    .badge:nth-child(3) { animation-delay: .6s; }
+    .badge:nth-child(4) { animation-delay: .9s; }
+    .badge:nth-child(5) { animation-delay: 1.2s; }
+    @keyframes badge-float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+    .badge-pink  { color: var(--accent1); border-color: rgba(255,107,157,.5); background: rgba(255,107,157,.1); }
+    .badge-purp  { color: var(--accent2); border-color: rgba(199,146,234,.5); background: rgba(199,146,234,.1); }
+    .badge-cyan  { color: var(--accent3); border-color: rgba(126,232,250,.5); background: rgba(126,232,250,.1); }
+    .badge-yell  { color: var(--accent4); border-color: rgba(255,203,107,.5); background: rgba(255,203,107,.1); }
+    .badge-green { color: var(--green);   border-color: rgba(168,255,120,.5); background: rgba(168,255,120,.1); }
 
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin: 40px 0;
-        }
+    /* ── STATUS BAR ── */
+    .statusbar {
+      background: #0a1a2e;
+      border-top: 1px solid var(--border);
+      height: 24px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 16px;
+      font-size: 10.5px;
+      color: var(--muted);
+      position: sticky;
+      bottom: 0;
+      z-index: 100;
+    }
+    .statusbar .s-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .statusbar .s-item.active { color: var(--accent3); }
+    .statusbar-right {
+      margin-left: auto;
+      display: flex;
+      gap: 14px;
+    }
+    .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: live-pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes live-pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .4; transform: scale(.7); }
+    }
 
-        .skill-card {
-            background: rgba(0, 255, 65, 0.05);
-            border: 2px solid #00ff41;
-            border-radius: 10px;
-            padding: 25px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
+    /* ── CONTACT BLOCK ── */
+    .contact-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 12px 0;
+    }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 12px;
+      color: var(--text);
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .contact-item:hover {
+      border-color: var(--accent1);
+      color: var(--accent1);
+      transform: translateY(-2px);
+    }
 
-        .skill-card::before {
-            content: '> LOADING...';
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            font-size: 0.7em;
-            color: #ff00de;
-            opacity: 0;
-            transition: 0.3s;
-        }
+    /* ── SCROLLBAR ── */
+    .main-content::-webkit-scrollbar { width: 6px; }
+    .main-content::-webkit-scrollbar-track { background: var(--bg); }
+    .main-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .main-content::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
-        .skill-card:hover::before {
-            opacity: 1;
-        }
+    /* ── ANIMATIONS ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fade-up .6s ease forwards;
+    }
+    .fade-in:nth-child(1) { animation-delay: .05s; }
+    .fade-in:nth-child(2) { animation-delay: .1s; }
+    .fade-in:nth-child(3) { animation-delay: .15s; }
+    .fade-in:nth-child(4) { animation-delay: .2s; }
+    .fade-in:nth-child(5) { animation-delay: .25s; }
+    .fade-in:nth-child(6) { animation-delay: .3s; }
+    @keyframes fade-up {
+      to { opacity: 1; transform: none; }
+    }
 
-        .skill-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.4);
-            background: rgba(0, 255, 65, 0.1);
-        }
+    /* ── PERSONAL / FUN FACTS ── */
+    .personal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+      margin: 16px 0;
+    }
+    .pcard {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 18px 14px;
+      transition: all .25s;
+      position: relative;
+      overflow: hidden;
+      cursor: default;
+    }
+    .pcard::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 20%, var(--card-glow, rgba(255,107,157,.06)) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .pcard:hover {
+      transform: translateY(-3px);
+      border-color: var(--card-border, rgba(255,107,157,.4));
+      box-shadow: 0 8px 24px var(--card-shadow, rgba(255,107,157,.08));
+    }
+    .pcard-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .pcard-icon {
+      font-size: 20px;
+      line-height: 1;
+      filter: drop-shadow(0 0 6px currentColor);
+    }
+    .pcard-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      color: var(--card-color, var(--accent1));
+    }
+    .pcard-body {
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+    .pcard-body .hi { color: var(--card-color, var(--accent1)); font-weight: 600; }
+    .pcard-lvl {
+      display: flex;
+      gap: 5px;
+      margin-top: 12px;
+    }
+    .pcard-lvl-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--card-color, var(--accent1));
+      opacity: .25;
+      transition: opacity .2s;
+    }
+    .pcard-lvl-dot.lit { opacity: 1; }
+    .pcard:hover .pcard-lvl-dot { opacity: .5; }
+    .pcard:hover .pcard-lvl-dot.lit { opacity: 1; }
 
-        .skill-icon {
-            font-size: 2.5em;
-            margin-bottom: 15px;
-            display: block;
-            filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.5));
-        }
-
-        .skill-title {
-            font-size: 1.3em;
-            margin-bottom: 10px;
-            color: #00ffff;
-            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-        }
-
-        .skill-desc {
-            color: #00ff41;
-            line-height: 1.6;
-            font-size: 0.9em;
-        }
-
-        .level-indicator {
-            margin-top: 15px;
-            display: flex;
-            gap: 5px;
-        }
-
-        .level-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: rgba(0, 255, 65, 0.2);
-            border: 1px solid #00ff41;
-            transition: 0.3s;
-        }
-
-        .level-dot.active {
-            background: #00ff41;
-            box-shadow: 0 0 10px rgba(0, 255, 65, 0.8);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .contact-section {
-            text-align: center;
-            margin: 60px 0;
-            padding: 40px;
-            background: rgba(255, 0, 222, 0.05);
-            border: 2px solid #ff00de;
-            border-radius: 10px;
-        }
-
-        .contact-header {
-            font-size: 2em;
-            margin-bottom: 20px;
-            color: #ff00de;
-        }
-
-        .contact-prompt {
-            color: #00ffff;
-            margin-bottom: 30px;
-        }
-
-        .contact-info {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 1.1em;
-            background: rgba(0, 255, 65, 0.08);
-            padding: 15px 30px;
-            border: 1px solid #00ff41;
-            border-radius: 5px;
-            transition: 0.3s;
-        }
-
-        .contact-item:hover {
-            background: rgba(0, 255, 65, 0.15);
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
-            transform: translateX(5px);
-        }
-
-        .contact-icon {
-            font-size: 1.5em;
-        }
-
-        .contact-link {
-            color: #00ff41;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-
-        .contact-link:hover {
-            color: #00ffff;
-            text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
-        }
-
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            color: #00ff41;
-            font-size: 0.9em;
-            border-top: 1px solid #00ff41;
-            margin-top: 60px;
-        }
-
-        @media (max-width: 768px) {
-            .glitch {
-                font-size: 2em;
-            }
-            .skills-grid {
-                grid-template-columns: 1fr;
-            }
-            .ascii-art {
-                font-size: 6px;
-            }
-        }
-    </style>
+    @media (max-width: 680px) {
+      .ide-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .tabs-bar { grid-column: 1; }
+    }
+  </style>
 </head>
 <body>
-    <div class="scanline"></div>
-    <div class="container">
-        <header>
-            <div class="ascii-art">
-   _____ _          __        ___ _     _                  _ 
-  |_   _| |__   ___  \ \      / (_) | __| | ___ __ _ _ __ __| |
-    | | | '_ \ / _ \  \ \ /\ / /| | |/ _` |/ __/ _` | '__/ _` |
-    | | | | | |  __/   \ V  V / | | | (_| | (_| (_| | | | (_| |
-    |_| |_| |_|\___|    \_/\_/  |_|_|\__,_|\___\__,_|_|  \__,_|
-            </div>
-            <h1 class="glitch">THE WILDCARD</h1>
-            <p class="tagline"><span class="prompt">root@wildcard:~$</span> <span class="typing">cat /skills/data_engineer.txt</span></p>
-            <p class="tagline" style="margin-top: 10px;">Jack of All Trades | Data Pipeline Architect | Professional Debugger of Life</p>
-            <div class="quote">
-                <span class="prompt">//</span> "A jack of all trades is a master of none,<br>
-                but oftentimes better than a master of one"<br>
-                <span class="prompt">//</span> And also better at finding the bug at 3 AM
-            </div>
-        </header>
 
-        <div class="stats-section">
-            <h2 class="stats-header">╔═══ SYSTEM.STATS() ═══╗</h2>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-number">500</div>
-                    <div class="stat-label">pages/72hrs<br>(with coffee breaks)</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">∞</div>
-                    <div class="stat-label">data_points_analyzed<br>(and counting)</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">52</div>
-                    <div class="stat-label">cards.deck_size()<br>(all accounted for)</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">9001</div>
-                    <div class="stat-label">binge_watch_level<br>(it's over 9000!)</div>
-                </div>
-            </div>
-        </div>
+<!-- TITLE BAR -->
+<div class="titlebar">
+  <div class="dots">
+    <div class="dot dot-r"></div>
+    <div class="dot dot-y"></div>
+    <div class="dot dot-g"></div>
+  </div>
+  <div class="titlebar-name">
+    <span>aanchal.sharma</span> — VSChaos 9.0.0 (Definitely Not VS Code)
+  </div>
+</div>
 
-        <div class="terminal-border">
-            <div class="skills-grid">
-                <div class="skill-card">
-                    <span class="skill-icon">📊</span>
-                    <h3 class="skill-title">[DATA_WHISPERER]</h3>
-                    <p class="skill-desc">// Passionate about extracting stories from data. Every dataset is like a 500-page thriller—except I finish it in 3 days while solving production bugs.</p>
-                    <div class="level-indicator">
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                    </div>
-                </div>
+<!-- MENU BAR -->
+<div class="menubar">
+  <span>File</span>
+  <span>Edit</span>
+  <span>View</span>
+  <span>Run</span>
+  <span style="color:var(--accent1)">Deploy 🚀</span>
+</div>
 
-                <div class="skill-card">
-                    <span class="skill-icon">📚</span>
-                    <h3 class="skill-title">[BOOK_INHALER.py]</h3>
-                    <p class="skill-desc">// Speed: 500 pages in 3 days. That's like processing 166.67 pages/day. More efficient than most ETL pipelines. Books are just unstructured data waiting to be absorbed.</p>
-                    <div class="level-indicator">
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                    </div>
-                </div>
+<div class="ide-layout">
 
-                <div class="skill-card">
-                    <span class="skill-icon">🃏</span>
-                    <h3 class="skill-title">[CARD_SHARK.exe]</h3>
-                    <p class="skill-desc">// Great at cards because probability is just another algorithm. Shuffle = randomization. Winning = optimized decision trees. Plus, bluffing is basically A/B testing your opponents.</p>
-                    <div class="level-indicator">
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot"></div>
-                    </div>
-                </div>
-
-                <div class="skill-card">
-                    <span class="skill-icon">📺</span>
-                    <h3 class="skill-title">[BINGE_MASTER_3000]</h3>
-                    <p class="skill-desc">// World-class level unlocked! Multi-season marathons completed in record time. If streaming services had achievement badges, I'd have them all. Netflix asks ME for recommendations.</p>
-                    <div class="level-indicator">
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                    </div>
-                </div>
-
-                <div class="skill-card">
-                    <span class="skill-icon">🏓</span>
-                    <h3 class="skill-title">[pickleball_skills++]</h3>
-                    <p class="skill-desc">// Status: IMPROVING. Like debugging code—every game reveals new edge cases. Current trajectory suggests champion status in 3-5 sprints. Unit tests pending.</p>
-                    <div class="level-indicator">
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot"></div>
-                        <div class="level-dot"></div>
-                    </div>
-                </div>
-
-                <div class="skill-card">
-                    <span class="skill-icon">🕺</span>
-                    <h3 class="skill-title">[DANCE_MODE: ENABLED]</h3>
-                    <p class="skill-desc">// Drunk dancing = removing all filters and running in production. Zero test coverage, 100% confidence. Critics say "amazing," logs say "entertaining," dance floor says "legendary."</p>
-                    <div class="level-indicator">
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                    </div>
-                </div>
-
-                <div class="skill-card">
-                    <span class="skill-icon">🕷️</span>
-                    <h3 class="skill-title">[SCRAPY_NINJA.sh]</h3>
-                    <p class="skill-desc">// Web scraping wizard. If it's on the internet, I can extract it. HTML, JSON, or that weird nested structure someone thought was a good idea—I'll parse it all. Web data doesn't hide from me.</p>
-                    <div class="level-indicator">
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot"></div>
-                    </div>
-                </div>
-
-                <div class="skill-card">
-                    <span class="skill-icon">🛠️</span>
-                    <h3 class="skill-title">[JUGAAD_PRIMA_DONNA]</h3>
-                    <p class="skill-desc">// Queen of creative hacks and elegant workarounds. Documentation says impossible? Jugaad says "hold my chai." Why use 5 tools when duct tape, Python, and determination will do? Prima donna of practical solutions.</p>
-                    <div class="level-indicator">
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                    </div>
-                </div>
-
-                <div class="skill-card">
-                    <span class="skill-icon">🎯</span>
-                    <h3 class="skill-title">[VERSATILITY.core]</h3>
-                    <p class="skill-desc">// The wildcard advantage: adaptable, curious, and dangerously competent. Jack of all trades means I debug your code, analyze your data, win at cards, AND suggest what to binge next.</p>
-                    <div class="level-indicator">
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                        <div class="level-dot active"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="contact-section">
-            <h2 class="contact-header">╔═══ ESTABLISH_CONNECTION() ═══╗</h2>
-            <p class="contact-prompt">// Let's talk data pipelines, books, card strategies, or which series deserves your next weekend.</p>
-            <div class="contact-info">
-                <div class="contact-item">
-                    <span class="contact-icon">📧</span>
-                    <span class="prompt">email:</span>
-                    <a href="mailto:95712aanchalsharma@gmail.com" class="contact-link">95712aanchalsharma@gmail.com</a>
-                </div>
-                <div class="contact-item">
-                    <span class="contact-icon">📱</span>
-                    <span class="prompt">phone:</span>
-                    <a href="tel:+919571225391" class="contact-link">+91 9571225391</a>
-                </div>
-            </div>
-        </div>
-
-        <footer>
-            <p><span class="prompt">root@wildcard:~$</span> echo "© 2024 The Wildcard | Proof that versatility > specialization"</p>
-            <p style="margin-top: 10px; color: #00ffff;">// Bug reports welcome. Feature requests negotiable. Jugaad solutions guaranteed.</p>
-        </footer>
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-header">
+        <span class="arrow">▾</span> EXPLORER
+      </div>
+      <a href="#about"    class="sidebar-item active"><span class="file-icon">📄</span> about.py</a>
+      <a href="#skills"   class="sidebar-item"><span class="file-icon">🧠</span> skills.json</a>
+      <a href="#projects" class="sidebar-item"><span class="file-icon">🚀</span> projects.ts</a>
+      <a href="#stats"    class="sidebar-item"><span class="file-icon">📊</span> metrics.sql</a>
+      <a href="#personal" class="sidebar-item"><span class="file-icon">🎲</span> unlocked.md</a>
+      <a href="#contact"  class="sidebar-item"><span class="file-icon">📡</span> contact.sh</a>
     </div>
-</body>
-</html>
+
+    <div class="sidebar-section" style="margin-top:12px">
+      <div class="sidebar-header">
+        <span class="arrow">▾</span> GIT
+      </div>
+      <div class="sidebar-item"><span class="file-icon" style="color:var(--green)">●</span> main branch</div>
+      <div class="sidebar-item"><span class="file-icon" style="color:var(--accent4)">↑</span> 12+ shipped</div>
+      <div class="sidebar-item"><span class="file-icon" style="color:var(--accent1)">✦</span> open to PRs</div>
+    </div>
+
+    <div class="sidebar-section" style="margin-top:12px">
+      <div class="sidebar-header">
+        <span class="arrow">▾</span> OUTLINE
+      </div>
+      <div class="sidebar-item" style="font-size:11px; color:var(--accent2)">⬡ DataEngineer</div>
+      <div class="sidebar-item" style="font-size:11px; color:var(--accent3); padding-left:40px">→ FinOps</div>
+      <div class="sidebar-item" style="font-size:11px; color:var(--accent2)">⬡ AIBuilder</div>
+      <div class="sidebar-item" style="font-size:11px; color:var(--accent3); padding-left:40px">→ LLMs</div>
+      <div class="sidebar-item" style="font-size:11px; color:var(--accent3); padding-left:40px">→ LangGraph</div>
+      <div class="sidebar-item" style="font-size:11px; color:var(--accent2)">⬡ Mentor</div>
+    </div>
+
+    <div style="padding: 20px 16px 4px; font-size:10px; color:var(--line-num)">
+      ✦ 3 yrs experience<br>
+      ✦ 12+ projects shipped<br>
+      ✦ 5 mentees unlocked
+    </div>
+  </nav>
+
+  <!-- MAIN AREA -->
+  <div style="display:flex; flex-direction:column;">
+
+    <!-- TABS -->
+    <div class="tabs-bar">
+      <div class="tab active"><span class="file-icon">📄</span> about.py <span class="tab-dot"></span></div>
+      <div class="tab"><span class="file-icon">🧠</span> skills.json</div>
+      <div class="tab"><span class="file-icon">🚀</span> projects.ts</div>
+      <div class="tab"><span class="file-icon">📊</span> metrics.sql</div>
+      <div class="tab"><span class="file-icon">🎲</span> unlocked.md</div>
+      <div class="tab"><span class="file-icon">📡</span> contact.sh</div>
+    </div>
+
+    <div class="main-content">
+
+      <!-- ══ ABOUT SECTION ══ -->
+      <section id="about">
+        <div class="code-section hero-section">
+          <div class="line-numbers">
+            1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17
+          </div>
+          <div class="code-body">
+            <div style="margin-bottom:20px">
+              <span class="cmt"># ════════════════════════════════════════</span><br>
+              <span class="cmt"># &nbsp;wildcard.engineer — v2025.02 STABLE</span><br>
+              <span class="cmt"># ════════════════════════════════════════</span>
+            </div>
+
+            <span class="kw">class</span> <span class="cls">Aanchal</span><span class="punc">(</span><span class="cls">WildcardEngineer</span><span class="punc">):</span><br>
+            &nbsp;&nbsp;<div class="badge-row" style="margin:10px 0 14px">
+              <span class="badge badge-pink">🎲 WILDCARD</span>
+              <span class="badge badge-purp">🧩 PROBLEM SOLVER</span>
+              <span class="badge badge-cyan">☁️ CLOUD NATIVE</span>
+              <span class="badge badge-yell">⚡ AI BUILDER</span>
+              <span class="badge badge-green">🔥 DATA WIZARD</span>
+            </div>
+
+            &nbsp;&nbsp;<div class="glitch-wrapper">
+              <span class="hero-name" data-text="Aanchal Sharma">Aanchal Sharma</span>
+              <span class="hero-tag">she/her</span>
+              <span class="typing-cursor"></span>
+            </div>
+            <br>
+            &nbsp;&nbsp;<span class="kw">def</span> <span class="fn">__init__</span><span class="punc">(</span><span class="var">self</span><span class="punc">):</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="var">self</span><span class="punc">.</span><span class="prop">role</span> <span class="punc">=</span> <span class="str">"Data Engineer & FinOps Specialist"</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="var">self</span><span class="punc">.</span><span class="prop">company</span> <span class="punc">=</span> <span class="str">"CloudKeeper"</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="var">self</span><span class="punc">.</span><span class="prop">since</span> <span class="punc">=</span> <span class="num">2022</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="var">self</span><span class="punc">.</span><span class="prop">location</span> <span class="punc">=</span> <span class="str">"Kota, Rajasthan 🇮🇳"</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="var">self</span><span class="punc">.</span><span class="prop">superpower</span> <span class="punc">=</span> <span class="str">"turning chaos into scalable systems"</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="var">self</span><span class="punc">.</span><span class="prop">mentees</span> <span class="punc">=</span> <span class="num">5</span>  <span class="cmt"># and counting 🚀</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="var">self</span><span class="punc">.</span><span class="prop">projects_shipped</span> <span class="punc">=</span> <span class="str">"12+ 💥"</span>
+          </div>
+        </div>
+
+        <!-- TERMINAL -->
+        <div style="padding:0 28px 24px; background:var(--bg);">
+          <div class="terminal">
+            <div class="terminal-bar">
+              <div class="dots">
+                <div class="dot dot-r"></div>
+                <div class="dot dot-y"></div>
+                <div class="dot dot-g"></div>
+              </div>
+              <span class="terminal-title">terminal — aanchal@cloudkeeper</span>
+            </div>
+            <div class="terminal-body">
+              <div><span class="prompt">aanchal</span><span class="prompt-path">@cloudkeeper</span> <span class="prompt-branch">~/portfolio</span> <span style="color:var(--muted)">git:(</span><span class="prompt-branch">main</span><span style="color:var(--muted)">)</span> $ <span class="cmd">cat whoami.txt</span></div>
+              <span class="output success">✔ Data Engineer who doesn't just ETL data—engineers intelligence around it</span>
+              <span class="output success">✔ LLM whisperer: built agents that actually ship to prod, not just demos</span>
+              <span class="output success">✔ Turned a 3-hour workflow into 10 mins. 18x. No big deal (it was a big deal)</span>
+              <span class="output success">✔ Processes millions of records in 1.5 mins — 80x faster than before</span>
+              <span class="output warn">⚡ currently: making AI less scary for non-technical humans</span>
+              <div style="margin-top:8px"><span class="prompt">aanchal</span><span class="prompt-path">@cloudkeeper</span> <span class="prompt-branch">~/portfolio</span> $ <span class="cmd typing-text">_</span><span class="typing-cursor"></span></div>
+            </div>
+          </div>
+        </div>
+        <hr class="section-sep"/>
+      </section>
+
+      <!-- ══ SKILLS SECTION ══ -->
+      <section id="skills">
+        <div class="code-section">
+          <div class="line-numbers">
+            18<br>19<br>20<br>21<br>22<br>23<br>24<br>25<br>26<br>27<br>28<br>29<br>30<br>31<br>32<br>33<br>34
+          </div>
+          <div class="code-body">
+            <div style="margin-bottom:12px">
+              <span class="cmt">// ──── skills.json ────</span>
+            </div>
+            <span class="punc">{</span><br>
+            &nbsp;&nbsp;<span class="prop">"AI_ML"</span><span class="punc">:</span> <span class="punc">[</span>
+            <div class="skills-grid" style="margin: 10px 0 10px 16px;">
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent1)"></span>LangGraph</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent1)"></span>LangChain</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent1)"></span>RAG</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent1)"></span>Fine Tuning</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent1)"></span>GuardRails</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent1)"></span>NLP</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent1)"></span>Prompt Eng</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent1)"></span>Agent Tools</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent1)"></span>Evals</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent1)"></span>Context Eng</div>
+            </div>
+            <span class="punc">]</span><span class="punc">,</span><br>
+            &nbsp;&nbsp;<span class="prop">"Backend"</span><span class="punc">:</span> <span class="punc">[</span>
+            <div class="skills-grid" style="margin: 10px 0 10px 16px;">
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent3)"></span>Python</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent3)"></span>ETL/ELT</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent3)"></span>SQL</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent3)"></span>Boto3 SDK</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent3)"></span>API Dev</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent3)"></span>CI/CD</div>
+            </div>
+            <span class="punc">]</span><span class="punc">,</span><br>
+            &nbsp;&nbsp;<span class="prop">"Cloud"</span><span class="punc">:</span> <span class="punc">[</span>
+            <div class="skills-grid" style="margin: 10px 0 10px 16px;">
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent4)"></span>AWS S3</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent4)"></span>Athena</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent4)"></span>Glue</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent4)"></span>BigQuery</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent4)"></span>Azure</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent4)"></span>Snowflake</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent4)"></span>PostgreSQL</div>
+              <div class="skill-chip fade-in"><span class="chip-dot" style="background:var(--accent4)"></span>Pandas</div>
+            </div>
+            <span class="punc">]</span>
+            <br><span class="punc">}</span>
+          </div>
+        </div>
+        <hr class="section-sep"/>
+      </section>
+
+      <!-- ══ PROJECTS SECTION ══ -->
+      <section id="projects">
+        <div class="code-section">
+          <div class="line-numbers">
+            35<br>36<br>37<br>38<br>39<br>40<br>41<br>42<br>43<br>44<br>45<br>46<br>47<br>48<br>49<br>50<br>51<br>52<br>53<br>54<br>55<br>56<br>57<br>58
+          </div>
+          <div class="code-body">
+            <div style="margin-bottom:16px">
+              <span class="cmt">// projects.ts — things I actually shipped 🛸</span>
+            </div>
+            <span class="kw">const</span> <span class="var">projects</span><span class="punc">:</span> <span class="cls">Project</span><span class="punc">[]</span> <span class="punc">=</span> <span class="punc">[</span>
+
+            <div class="projects-grid" style="margin-top:16px">
+
+              <div class="project-card fade-in">
+                <div class="project-title">🤖 AI Natural Language Agent</div>
+                <div class="project-desc">LLM-based assistant democratizing data access for non-technical users. Real-time queries against complex cost datasets through pure conversation.</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:8px">
+                  <span class="project-metric">✦ prod shipped</span>
+                </div>
+                <div class="project-tags">
+                  <span class="ptag">LLM</span><span class="ptag">Prompt Eng</span><span class="ptag">Agent Tools</span><span class="ptag">Evals</span>
+                </div>
+              </div>
+
+              <div class="project-card fade-in">
+                <div class="project-title">⚡ LangGraph Content Gen System (SDR)</div>
+                <div class="project-desc">Intelligent workflow automation slashing content prep time from 3 hrs to 10 minutes. Multi-step reasoning with custom orchestration logic.</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:8px">
+                  <span class="project-metric">🔥 18x faster</span>
+                </div>
+                <div class="project-tags">
+                  <span class="ptag">LangGraph</span><span class="ptag">Agent Tools</span><span class="ptag">Automation</span>
+                </div>
+              </div>
+
+              <div class="project-card fade-in">
+                <div class="project-title">🏗️ Enterprise Data Platform</div>
+                <div class="project-desc">High-performance backend processing AWS, GCP, and Azure billing data for 400+ enterprise clients. Scalable ETL/ELT with modular architecture.</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:8px">
+                  <span class="project-metric">✦ 400+ clients</span>
+                </div>
+                <div class="project-tags">
+                  <span class="ptag">Python</span><span class="ptag">Snowflake</span><span class="ptag">Boto3</span><span class="ptag">Multi-cloud</span>
+                </div>
+              </div>
+
+              <div class="project-card fade-in">
+                <div class="project-title">🛡️ Validation Framework</div>
+                <div class="project-desc">Enterprise-grade validation processing millions of records in 1.5 minutes through architectural redesign. 99.9%+ data accuracy across distributed systems.</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:8px">
+                  <span class="project-metric">💀 80x faster</span>
+                </div>
+                <div class="project-tags">
+                  <span class="ptag">Rule Engine</span><span class="ptag">Automation</span><span class="ptag">99.9% accuracy</span>
+                </div>
+              </div>
+
+              <div class="project-card fade-in">
+                <div class="project-title">📈 Predictive Analytics Engine</div>
+                <div class="project-desc">Advanced forecasting models with less than 0.5% variance from actual spend. Multi-dimensional algorithms across AWS, GCP, and Azure environments.</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:8px">
+                  <span class="project-metric">📍 &lt;0.5% variance</span>
+                </div>
+                <div class="project-tags">
+                  <span class="ptag">Forecasting</span><span class="ptag">BigQuery</span><span class="ptag">Time Series</span>
+                </div>
+              </div>
+
+              <div class="project-card fade-in">
+                <div class="project-title">💸 AWS Commitment Orchestrator</div>
+                <div class="project-desc">Transaction Management system orchestrating dynamic lifecycle of $5M+ annual AWS commitments. RI tracking with higher accuracy than AWS Cost Explorer itself.</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:8px">
+                  <span class="project-metric">💰 $5M+ managed</span>
+                </div>
+                <div class="project-tags">
+                  <span class="ptag">FinOps</span><span class="ptag">AWS RI</span><span class="ptag">Cost Opt</span>
+                </div>
+              </div>
+
+            </div>
+
+            <br><span class="punc">]</span>
+          </div>
+        </div>
+        <hr class="section-sep"/>
+      </section>
+
+      <!-- ══ METRICS SECTION ══ -->
+      <section id="stats">
+        <div class="code-section">
+          <div class="line-numbers">
+            59<br>60<br>61<br>62<br>63<br>64<br>65<br>66<br>67<br>68<br>69<br>70<br>71<br>72
+          </div>
+          <div class="code-body">
+            <div style="margin-bottom:16px">
+              <span class="cmt">-- metrics.sql — SELECT * FROM impact WHERE vibes = 'immaculate'</span>
+            </div>
+            <span class="kw">SELECT</span><br>
+            &nbsp;&nbsp;<span class="fn">count</span><span class="punc">(</span><span class="prop">projects_shipped</span><span class="punc">)</span> <span class="kw">AS</span> <span class="str">"12+ 🚀"</span><span class="punc">,</span><br>
+            &nbsp;&nbsp;<span class="fn">avg</span><span class="punc">(</span><span class="prop">performance_gain</span><span class="punc">)</span> <span class="kw">AS</span> <span class="str">"80x 💀"</span><span class="punc">,</span><br>
+            &nbsp;&nbsp;<span class="fn">max</span><span class="punc">(</span><span class="prop">efficiency_gain</span><span class="punc">)</span> <span class="kw">AS</span> <span class="str">"18x ⚡"</span><br>
+            <span class="kw">FROM</span> <span class="cls">aanchal</span><span class="punc">.</span><span class="cls">career</span><br>
+            <span class="kw">WHERE</span> <span class="prop">year</span> <span class="punc">&gt;=</span> <span class="num">2022</span><br>
+            &nbsp;&nbsp;<span class="kw">AND</span> <span class="prop">shipped_to_prod</span> <span class="punc">=</span> <span class="bool">true</span><span class="punc">;</span>
+
+            <div style="margin-top:28px">
+              <div class="stat-bar-row">
+                <span class="stat-label">Python / Backend</span>
+                <div class="stat-track"><div class="stat-fill" style="width:96%;background:linear-gradient(90deg,var(--accent3),var(--accent2))"></div></div>
+                <span class="stat-pct">96%</span>
+              </div>
+              <div class="stat-bar-row">
+                <span class="stat-label">LLMs / AI</span>
+                <div class="stat-track"><div class="stat-fill" style="width:90%;background:linear-gradient(90deg,var(--accent1),var(--accent2))"></div></div>
+                <span class="stat-pct">90%</span>
+              </div>
+              <div class="stat-bar-row">
+                <span class="stat-label">Cloud (AWS/GCP)</span>
+                <div class="stat-track"><div class="stat-fill" style="width:92%;background:linear-gradient(90deg,var(--accent4),var(--orange))"></div></div>
+                <span class="stat-pct">92%</span>
+              </div>
+              <div class="stat-bar-row">
+                <span class="stat-label">ETL / Data Eng</span>
+                <div class="stat-track"><div class="stat-fill" style="width:95%;background:linear-gradient(90deg,var(--green),var(--accent5))"></div></div>
+                <span class="stat-pct">95%</span>
+              </div>
+              <div class="stat-bar-row">
+                <span class="stat-label">FinOps</span>
+                <div class="stat-track"><div class="stat-fill" style="width:88%;background:linear-gradient(90deg,var(--accent5),var(--accent3))"></div></div>
+                <span class="stat-pct">88%</span>
+              </div>
+              <div class="stat-bar-row">
+                <span class="stat-label">Mentoring 🔥</span>
+                <div class="stat-track"><div class="stat-fill" style="width:100%;background:linear-gradient(90deg,var(--accent1),var(--accent4))"></div></div>
+                <span class="stat-pct">∞</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr class="section-sep"/>
+      </section>
+
+      <!-- ══ PERSONAL / UNLOCKED SECTION ══ -->
+      <section id="personal">
+        <div class="code-section">
+          <div class="line-numbers">
+            73<br>74<br>75<br>76<br>77<br>78<br>79<br>80<br>81<br>82<br>83<br>84<br>85<br>86<br>87<br>88<br>89<br>90<br>91<br>92<br>93<br>94<br>95<br>96
+          </div>
+          <div class="code-body">
+            <div style="margin-bottom:16px">
+              <span class="cmt">## unlocked.md — achievements outside the codebase</span><br>
+              <span class="cmt">## WARNING: not just a dev. dangerously multidimensional.</span>
+            </div>
+
+            <div class="personal-grid">
+
+              <!-- DATA WHISPERER -->
+              <div class="pcard fade-in" style="--card-color:var(--accent3);--card-border:rgba(126,232,250,.4);--card-shadow:rgba(126,232,250,.08);--card-glow:rgba(126,232,250,.07)">
+                <div class="pcard-header">
+                  <span class="pcard-icon">📊</span>
+                  <span class="pcard-title">[DATA_WHISPERER]</span>
+                </div>
+                <div class="pcard-body">
+                  <span class="cmt">// </span>Every dataset is a 500-page thriller—except I finish it in 3 days while <span class="hi">solving production bugs</span> at the same time. Stories live in the numbers.
+                </div>
+                <div class="pcard-lvl">
+                  <div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div>
+                </div>
+              </div>
+
+              <!-- BOOK INHALER -->
+              <div class="pcard fade-in" style="--card-color:var(--accent2);--card-border:rgba(199,146,234,.4);--card-shadow:rgba(199,146,234,.08);--card-glow:rgba(199,146,234,.07)">
+                <div class="pcard-header">
+                  <span class="pcard-icon">📚</span>
+                  <span class="pcard-title">[BOOK_INHALER.py]</span>
+                </div>
+                <div class="pcard-body">
+                  <span class="cmt">// </span>Speed: <span class="hi">500 pages in 3 days.</span> That's 166.67 pages/day—more efficient than most ETL pipelines. Books are just unstructured data waiting to be absorbed.
+                </div>
+                <div class="pcard-lvl">
+                  <div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div>
+                </div>
+              </div>
+
+              <!-- CARD SHARK -->
+              <div class="pcard fade-in" style="--card-color:var(--accent4);--card-border:rgba(255,203,107,.4);--card-shadow:rgba(255,203,107,.08);--card-glow:rgba(255,203,107,.07)">
+                <div class="pcard-header">
+                  <span class="pcard-icon">🃏</span>
+                  <span class="pcard-title">[CARD_SHARK.exe]</span>
+                </div>
+                <div class="pcard-body">
+                  <span class="cmt">// </span>Great at cards because probability is just another algorithm. <span class="hi">Shuffle = randomization. Winning = optimized decision trees.</span> Bluffing is basically A/B testing your opponents.
+                </div>
+                <div class="pcard-lvl">
+                  <div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot"></div>
+                </div>
+              </div>
+
+              <!-- BINGE MASTER -->
+              <div class="pcard fade-in" style="--card-color:var(--accent1);--card-border:rgba(255,107,157,.4);--card-shadow:rgba(255,107,157,.08);--card-glow:rgba(255,107,157,.07)">
+                <div class="pcard-header">
+                  <span class="pcard-icon">📺</span>
+                  <span class="pcard-title">[BINGE_MASTER_3000]</span>
+                </div>
+                <div class="pcard-body">
+                  <span class="cmt">// </span>World-class level unlocked! Multi-season marathons completed in record time. If streaming services had achievement badges, I'd have them all. <span class="hi">Netflix asks ME for recommendations.</span>
+                </div>
+                <div class="pcard-lvl">
+                  <div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div>
+                </div>
+              </div>
+
+              <!-- PICKLEBALL -->
+              <div class="pcard fade-in" style="--card-color:var(--green);--card-border:rgba(168,255,120,.4);--card-shadow:rgba(168,255,120,.08);--card-glow:rgba(168,255,120,.07)">
+                <div class="pcard-header">
+                  <span class="pcard-icon">🏓</span>
+                  <span class="pcard-title">[pickleball_skills++]</span>
+                </div>
+                <div class="pcard-body">
+                  <span class="cmt">// </span>Status: IMPROVING. Like debugging code—every game reveals new edge cases. <span class="hi">Current trajectory suggests champion status in 3–5 sprints.</span> Unit tests pending.
+                </div>
+                <div class="pcard-lvl">
+                  <div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot"></div><div class="pcard-lvl-dot"></div><div class="pcard-lvl-dot"></div>
+                </div>
+              </div>
+
+              <!-- DANCE MODE -->
+              <div class="pcard fade-in" style="--card-color:var(--orange);--card-border:rgba(255,157,85,.4);--card-shadow:rgba(255,157,85,.08);--card-glow:rgba(255,157,85,.07)">
+                <div class="pcard-header">
+                  <span class="pcard-icon">💃</span>
+                  <span class="pcard-title">[DANCE_MODE: ENABLED]</span>
+                </div>
+                <div class="pcard-body">
+                  <span class="cmt">// </span>Drunk dancing = removing all filters and running in production. <span class="hi">Zero test coverage, 100% confidence.</span> Critics say "amazing," logs say "entertaining," dance floor says "legendary."
+                </div>
+                <div class="pcard-lvl">
+                  <div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div>
+                </div>
+              </div>
+
+              <!-- SCRAPY NINJA -->
+              <div class="pcard fade-in" style="--card-color:var(--accent5);--card-border:rgba(128,203,196,.4);--card-shadow:rgba(128,203,196,.08);--card-glow:rgba(128,203,196,.07)">
+                <div class="pcard-header">
+                  <span class="pcard-icon">🕷️</span>
+                  <span class="pcard-title">[SCRAPY_NINJA.sh]</span>
+                </div>
+                <div class="pcard-body">
+                  <span class="cmt">// </span>Web scraping wizard. If it's on the internet, I can extract it. HTML, JSON, or that weird nested structure someone thought was a good idea — <span class="hi">I'll parse it all. Web data doesn't hide from me.</span>
+                </div>
+                <div class="pcard-lvl">
+                  <div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot"></div>
+                </div>
+              </div>
+
+              <!-- JUGAAD PRIMA DONNA -->
+              <div class="pcard fade-in" style="--card-color:var(--accent2);--card-border:rgba(199,146,234,.4);--card-shadow:rgba(199,146,234,.08);--card-glow:rgba(199,146,234,.07)">
+                <div class="pcard-header">
+                  <span class="pcard-icon">🔧</span>
+                  <span class="pcard-title">[JUGAAD_PRIMA_DONNA]</span>
+                </div>
+                <div class="pcard-body">
+                  <span class="cmt">// </span>Queen of creative hacks and elegant workarounds. Documentation says impossible? <span class="hi">Jugaad says "hold my chai."</span> Why use 5 tools when duct tape, Python, and determination will do?
+                </div>
+                <div class="pcard-lvl">
+                  <div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div>
+                </div>
+              </div>
+
+              <!-- VERSATILITY CORE — full width -->
+              <div class="pcard fade-in" style="grid-column:1/-1;--card-color:var(--accent1);--card-border:rgba(255,107,157,.4);--card-shadow:rgba(255,107,157,.1);--card-glow:rgba(255,107,157,.08)">
+                <div class="pcard-header">
+                  <span class="pcard-icon">🎯</span>
+                  <span class="pcard-title">[VERSATILITY.core] — the wildcard advantage</span>
+                </div>
+                <div class="pcard-body" style="font-size:12.5px;">
+                  <span class="cmt">// </span>Adaptable, curious, and <span class="hi">dangerously competent.</span> Jack of all trades means I debug your code, analyze your data, win at cards, AND tell you what to binge next.
+                  <br><br>
+                  <span class="kw">assert</span> versatility <span class="punc">==</span> <span class="str">"not a bug, it's a feature"</span>  <span class="cmt"># passes every time</span>
+                </div>
+                <div class="pcard-lvl">
+                  <div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div><div class="pcard-lvl-dot lit"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <hr class="section-sep"/>
+      </section>
+
+      <!-- ══ CONTACT SECTION ══ -->
+      <section id="contact">
+        <div class="code-section">
+          <div class="line-numbers">
+            97<br>98<br>99<br>100<br>101<br>102<br>103<br>104<br>105
+          </div>
+          <div class="code-body">
+            <div style="margin-bottom:16px">
+              <span class="cmt"># contact.sh — let's build something unhinged together</span>
+            </div>
+            <span class="fn">echo</span> <span class="str">"wanna collab? open to: senior roles, AI projects, chaos"</span>
+            <br><br>
+            <div class="contact-row">
+              <a href="/cdn-cgi/l/email-protection#4e2f2f603d2660202d262f220e29232f2722602d2123" class="contact-item">
+                📧 <span class="__cf_email__" data-cfemail="7312125d001b5d1d101b121f33141e121a1f5d101c1e">[email&#160;protected]</span>
+              </a>
+              <a href="tel:9571225391" class="contact-item">
+                📞 +91 9571225391
+              </a>
+              <div class="contact-item" style="cursor:default">
+                📍 Kota, Rajasthan
+              </div>
+            </div>
+
+            <br>
+            <span class="kw">export</span> <span class="var">EDUCATION</span><span class="punc">=</span><span class="str">"BTech CS — Cloud Computing & Virtual Tech"</span><br>
+            <span class="kw">export</span> <span class="var">UNIVERSITY</span><span class="punc">=</span><span class="str">"UPES Dehradun (2018-2022)"</span><br>
+            <br>
+            <div style="margin-top:10px; padding: 12px 16px; background: rgba(168,255,120,.05); border: 1px solid rgba(168,255,120,.2); border-radius:6px; font-size:12px;">
+              <span style="color:var(--green)">✔</span> Available for <span class="str">"senior data / AI engineering roles"</span><br>
+              <span style="color:var(--green)">✔</span> Ships fast, breaks things (then fixes them better)<br>
+              <span style="color:var(--green)">✔</span> Will mentor your junior devs and make them dangerous<br>
+              <span style="color:var(--accent4)">★</span> <span class="cmt">not just a cog in the machine — she IS the machine</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /main-content -->
+  </div><!-- /col -->
+</div><!-- /layout -->
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <div class="s-item active"><div class="live-dot"></div> main</div>
+  <div class="s-item">⚡ Python</div>
+  <div class="s-item">🔀 LangGraph</div>
+  <div class="s-item">☁️ Multi-cloud</div>
+  <div class="statusbar-right">
+    <div class="s-item">UTF-8</div>
+    <div class="s-item">Ln 105, Col 1</div>
+    <div class="s-item active">© Aanchal Sharma 2025</div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Sidebar active link
+  const items = document.querySelectorAll('.sidebar-item');
+  const sections = ['about','skills','projects','stats','personal','contact'];
+  window.addEventListener('scroll', () => {
+    let current = 'about';
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && window.scrollY >= el.offsetTop - 120) current = id;
+    });
+    items.forEach(item => {
+      item.classList.remove('active');
+      if (item.getAttribute('href') === '#' + current) item.classList.add('active');
+    });
+  });
+
+  // Smooth scroll tabs
+  document.querySelectorAll('.tab').forEach((tab, i) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const targets = ['about','skills','projects','stats','personal','contact'];
+      if (targets[i]) document.getElementById(targets[i])?.scrollIntoView({behavior:'smooth'});
+    });
+  });
+
+  // Typewriter for terminal
+  const typers = document.querySelectorAll('.typing-t
